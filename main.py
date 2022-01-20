@@ -1,3 +1,5 @@
+#!usr/bin/python3
+
 import smtplib
 import datetime
 from email.message import EmailMessage
@@ -15,71 +17,87 @@ from email.message import EmailMessage
 # I reccomend using the same email used in EMAIL_ADDRESS for testing purposes
 
 
-EMAIL_ADDRESS  =  input("Email: ")
-EMAIL_PASSWORD =  input("Password: ")
-contacts = input('Contact? ')
+# EMAIL_ADDRESS  =  input("Email: ")
+# EMAIL_PASSWORD =  input("Password: ")
+# contacts = input('Contact? ')
 
-tday = datetime.date.today()
+# Move all this to one function with variables, it prevents duplication and makes
+# expanding easier, for instance to add shift 3, 4, 5, and 6 you wouldn't have to 
+# change anything.
+def staffmarkemail(shift, employees, recipient):
+    today = datetime.date.today()
+    # Any computation you do, if you can you should try to pull it up to a variable
+    # it makes the value appear more standard and is better for performance.
+    today_str = today.strftime("%m-%d-%Y")
+    # f-strings allow you to inject variables in a cleaner way than adding, and
+    # you don't run into as many issues like the compiler trying to do math with
+    # strings depending on the order.
+    subject = f"Staffmark Report {shift} shift for {today_str}"
 
-Shift = input("Shift 1st or 2nd: ")
 
+    content_str = (
+        f"Linda, these are the people that reported to work for shift {shift} on {today_str}\n"
+        f"\n\n"
+    )
 
-
-
-def staffmarkemail1st():
-    s = "Staffmark Report " + Shift + " " + "Shift " + tday.strftime("%m-%d-%Y")
-
-
-
-    one = input("Mcdonald, Ronald'")
-    two = input("Berry, Allan")
-    three = input("Grimes, Gordan")
-    four = input("Johnson, flash")
+    for employee in employees:
+        content_str += f"{employee['name']} - {employee['email']}\n"
 
     msg = EmailMessage()
-    msg['Subject'] = (s)
-    msg['From'] = EMAIL_ADDRESS
-    msg['To'] = contacts
-    msg.set_content(
-        'Linda,  These are the people that reported to work on ' + tday.strftime("%m-%d-%Y ") + Shift + ' shift \n'
-        '\n\n Mcdonald, Ronald' + one + '\n'
-        'Berry, Allan' + two + '\n'
-        'Grimes, Gordan' + three + '\n'
-        'Johnson, flash' + four + '\n')
+    msg['Subject'] = (subject)
+    msg['To'] = recipient
+    msg.set_content(content_str)
+
+    # Personal preference, but I like to pull utilities like sending the email into their own
+    # function. It makes it easier to track down problems and expand in the future
+    send_email(msg)
+
+def send_email(email_message):
+    email_message['From'] = EMAIL_ADDRESS
 
     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
         smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
-        smtp.send_message(msg)
+        smtp.send_message(email_message)
+
+# Function to fetch the employees given a specific shift
+def fetch_employees(shift):
+    if shift == 1:
+        return [{
+            'name': 'Mcdonald, Ronald',
+            'email': 'ronald.mcdonald@gmail.com'
+        }, {
+            'name': 'Berry, Allan',
+            'email': 'allan.berry@gmail.com'
+        }, {
+            'name': 'Grimes, Gordan',
+            'email': 'gordan.grimes@gmail.com'
+        }, {
+            'name': 'Johnson, Flash',
+            'email': 'flash.johnson@gmail.com'
+        }]
+
+    if shift == 2:
+        return [{
+            'name': 'Halpert, Jim',
+            'email': 'jim.halpert@gmail.com'
+        }, {
+            'name': 'Schrute, Dwight',
+            'email': 'dwight.schrute@gmail.com'
+        }, {
+            'name': 'Evans, Montell',
+            'email': 'montell.evans@gmail.com'
+        }, {
+            'name': 'Riley, Mario',
+            'email': 'mario.riley@gmail.com'
+        }]
 
 
-def staffmarkemail2nd():
+# This is basically like main() in other languages. Doing it like this will allow you to
+# accept command line arguments
+if __name__ == "__main__":
+    shift = input("Shift to report: ")
+    recipient = input("Email to send report: ")
 
-    s = "Staffmark Report " + Shift + " " + "Shift " + tday.strftime("%m-%d-%Y")
-
-
-    one = input("Jim Halpert")
-    two = input("Dwight, Shrute")
-    three = input("Evans, Montell")
-    four = input("Riley, Mario")
-
-    msg = EmailMessage()
-    msg['Subject'] = (s)
-    msg['From'] = EMAIL_ADDRESS
-    msg['To'] = contacts
-    msg.set_content(
-        'Linda,  These are the people that reported to work on ' + tday.strftime("%m-%d-%Y ") + Shift + ' shift \n'
-        '\n\n '
-        'Jim Halpert' + one + '\n'
-        'Dwight, Shrute' + two + '\n'
-        'Evans, Montell' + three + '\n' 
-        'Riley, Mario' + four + '\n')
-
-    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-        smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
-        smtp.send_message(msg)
-
-if Shift == ('1st'):
-    staffmarkemail1st()
-
-if Shift == ('2nd'):
-    staffmarkemail2nd()
+    employees = fetch_employees(int(shift))
+ 
+    staffmarkemail(shift, employees, recipient)
