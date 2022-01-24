@@ -25,22 +25,6 @@ from email.message import EmailMessage
 # Move all this to one function with variables, it prevents duplication and makes
 # expanding easier, for instance to add shift 3, 4, 5, and 6 you wouldn't have to 
 # change anything.
-def staffmarkemail(shift, employees, recipient):
-    today = datetime.date.today()
-    # Any computation you do, if you can you should try to pull it up to a variable
-    # it makes the value appear more standard and is better for performance.
-    today_str = today.strftime("%m-%d-%Y")
-    # f-strings allow you to inject variables in a cleaner way than adding, and
-    # you don't run into as many issues like the compiler trying to do math with
-    # strings depending on the order.
-    subject = f"Staffmark Report {shift} shift for {today_str}"
-
-
-    content_str = (
-        f"Linda, these are the people that reported to work for shift {shift} on {today_str}\n"
-        f"\n\n"
-    )
-
 
 
 def staffmarkemail(shift, employees, recipient):
@@ -53,18 +37,14 @@ def staffmarkemail(shift, employees, recipient):
                   )
 
 
-    for names in names:
-        content_str += f"{names['name']} - {names['email']}\n"
-
-    for employee in employees:
-        content_str += f"{employee['name']} - {employee['email']}\n"
+    for names in []:
+        content_str += f"{names['name']}\n"
 
 
     msg = EmailMessage()
     msg['Subject'] = (subject)
     msg['To'] = recipient
     msg.set_content(content_str)
-
 
     # i really like this didnt even think about that!!!!
     send_email(msg)
@@ -112,4 +92,12 @@ def fetch_employees(shift):
             names[int(key)] = val
 
 
+
+if __name__ == "__main__":
+    shift = input("Shift to report: ")
+    recipient = input("Email to send report: ")
+
+    employees = fetch_employees(int(shift))
+
+    staffmarkemail(shift, employees, recipient)
 
