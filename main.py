@@ -4,6 +4,7 @@ import smtplib
 import datetime
 from email.message import EmailMessage
 
+
 # EMAIL_ADDRESS = os.environ.get('EMAIL_USER')
 # EMAIL_PASSWORD = os.environ.get('EMAIL_PASS')
 
@@ -40,64 +41,75 @@ def staffmarkemail(shift, employees, recipient):
         f"\n\n"
     )
 
+
+
+def staffmarkemail(shift, employees, recipient):
+    today = datetime.date.today()
+    today_str = today.strftime("%m-%d-%Y")
+    subject = f"Staffmark Report {shift} shift for {today_str}"
+    content_str = (
+        f"Linda, these are the people that reported to work for shift {shift} on {today_str}\n"
+        f"\n\n"
+                  )
+
+
+    for names in names:
+        content_str += f"{names['name']} - {names['email']}\n"
+
     for employee in employees:
         content_str += f"{employee['name']} - {employee['email']}\n"
+
 
     msg = EmailMessage()
     msg['Subject'] = (subject)
     msg['To'] = recipient
     msg.set_content(content_str)
 
-    # Personal preference, but I like to pull utilities like sending the email into their own
-    # function. It makes it easier to track down problems and expand in the future
+
+    # i really like this didnt even think about that!!!!
     send_email(msg)
 
-def send_email(email_message):
-    email_message['From'] = EMAIL_ADDRESS
 
+
+def send_email(email_message):
+
+    EMAIL_ADDRESS = input('')
+    EMAIL_PASSWORD = input('')
+    email_message['From'] = EMAIL_ADDRESS
     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
         smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
         smtp.send_message(email_message)
 
+
+
 # Function to fetch the employees given a specific shift
+# this is great! however i dont need their emails included.
+# the body of the email should auto print their names and then send out an email body looking like this
+# 'Mcdonald, Ronald - here
+#  Berry, Allan -  (out sick) <- this part to be the user input
+#  Grimes, Gordan - no show
+#  Johnson, Flash - here
+
+# so auto print the names and then accept user input for weather or not they showed up.
+
 def fetch_employees(shift):
     if shift == 1:
-        return [{
-            'name': 'Mcdonald, Ronald',
-            'email': 'ronald.mcdonald@gmail.com'
-        }, {
-            'name': 'Berry, Allan',
-            'email': 'allan.berry@gmail.com'
-        }, {
-            'name': 'Grimes, Gordan',
-            'email': 'gordan.grimes@gmail.com'
-        }, {
-            'name': 'Johnson, Flash',
-            'email': 'flash.johnson@gmail.com'
-        }]
+        return
+    names = {}
+    filename = "names1.txt"
+    with open(filename) as f:
+        for line in f:
+            (key, val) = line.strip().split('.')
+            names[int(key)] = val
 
     if shift == 2:
-        return [{
-            'name': 'Halpert, Jim',
-            'email': 'jim.halpert@gmail.com'
-        }, {
-            'name': 'Schrute, Dwight',
-            'email': 'dwight.schrute@gmail.com'
-        }, {
-            'name': 'Evans, Montell',
-            'email': 'montell.evans@gmail.com'
-        }, {
-            'name': 'Riley, Mario',
-            'email': 'mario.riley@gmail.com'
-        }]
+        return
+    names = {}
+    filename = "names2.txt"
+    with open(filename) as f:
+        for line in f:
+            (key, val) = line.strip().split('.')
+            names[int(key)] = val
 
 
-# This is basically like main() in other languages. Doing it like this will allow you to
-# accept command line arguments
-if __name__ == "__main__":
-    shift = input("Shift to report: ")
-    recipient = input("Email to send report: ")
 
-    employees = fetch_employees(int(shift))
- 
-    staffmarkemail(shift, employees, recipient)
